@@ -30,13 +30,11 @@
 			let mousePosition = null;
 
 			socket.on('render', ({ title, view }) => {
-				console.log('Received frame', title);
 				document.title = title;
 				app.setAttribute('src', 'data:image/png;base64,' + view);
 			});
 
 			socket.on('ready', () => {
-				console.log('Ready!');
 				onResize();
 				onMouseMove();
 			});
@@ -62,9 +60,62 @@
 				}
 				if (mousePosition === null) return;
 				socket.emit('mouse position', mousePosition);
-				console.log('mouse position', mousePosition);
 			};
 			document.onmousemove = onMouseMove;
+
+			document.onmousedown = event => {
+				console.log('mouse down', event);
+				switch (event.button) {
+					case 0:
+						socket.emit('mouse down', {
+							button: 'left',
+							x: event.clientX,
+							y: event.clientY
+						});
+						break;
+					case 1:
+						socket.emit('mouse down', {
+							button: 'middle',
+							x: event.clientX,
+							y: event.clientY
+						});
+						break;
+					case 2:
+						socket.emit('mouse down', {
+							button: 'right',
+							x: event.clientX,
+							y: event.clientY
+						});
+						break;
+				}
+			};
+
+			document.onmouseup = event => {
+				console.log('mouse up', event);
+				switch (event.button) {
+					case 0:
+						socket.emit('mouse up', {
+							button: 'left',
+							x: event.clientX,
+							y: event.clientY
+						});
+						break;
+					case 1:
+						socket.emit('mouse up', {
+							button: 'middle',
+							x: event.clientX,
+							y: event.clientY
+						});
+						break;
+					case 2:
+						socket.emit('mouse up', {
+							button: 'right',
+							x: event.clientX,
+							y: event.clientY
+						});
+						break;
+				}
+			};
 		</script>
 
 		<!-- *** jQuery *** -->

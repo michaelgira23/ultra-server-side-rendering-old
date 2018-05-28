@@ -4,7 +4,6 @@ const puppeteer = require('puppeteer');
 class Browser {
 
 	constructor(socket) {
-		console.log('Create browser');
 		this.socket = socket;
 		this.puppet = null;
 		this.page = null;
@@ -26,10 +25,13 @@ class Browser {
 		this.puppet = await puppeteer.launch();
 		// this.puppet = await puppeteer.launch({ headless: false, slowMo: 250 });
 		this.page = await this.puppet.newPage();
-		await this.navigate(`file://${__dirname}/../pages/page1.html`);
+		// await this.navigate(`file://${__dirname}/../pages/page1.html`);
+		await this.navigate('https://google.com');
 
 		this.socket.on('viewport dimensions', dimensions => this.setViewport(dimensions));
 		this.socket.on('mouse position', position => this.setMousePosition(position));
+		this.socket.on('mouse down', mouseEvent => this.mouseDown(mouseEvent));
+		this.socket.on('mouse up', mouseEvent => this.mouseUp(mouseEvent));
 
 		this.socket.emit('ready');
 
@@ -42,7 +44,6 @@ class Browser {
 	}
 
 	async kill() {
-		console.log('Die');
 		await this.puppet.close();
 	}
 
@@ -85,7 +86,6 @@ class Browser {
 				height: this.viewport.height,
 				deviceScaleFactor: this.viewport.devicePixelRatio
 			});
-			console.log('set viewport');
 		}
 	}
 
@@ -102,8 +102,21 @@ class Browser {
 		}
 		if (!this.pauseBrowserUpdates && this.mousePosition !== null) {
 			this.page.mouse.move(this.mousePosition.x, this.mousePosition.y);
-			console.log('mouse position', this.mousePosition);
 		}
+	}
+
+	/**
+	 * I/O Events
+	 */
+
+	mouseDown({ button, x, y }) {
+		this.page.mouse.move(x, y)
+		this.page.mouse.down({ button });
+	}
+
+	mouseUp({ button, x, y }) {
+		this.page.mouse.move(x, y)
+		this.page.mouse.up({ button });
 	}
 }
 
