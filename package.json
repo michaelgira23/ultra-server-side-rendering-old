@@ -1,0 +1,30 @@
+{
+  "name": "ultra-server-side-rendering",
+  "version": "1.0.0",
+  "description": "Increasing performance by leveraging renderization of the web page onto the back-end",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/michaelgira23/ultra-server-side-rendering.git"
+  },
+  "keywords": [
+    "ultra",
+    "server",
+    "side",
+    "rendering"
+  ],
+  "author": "Michael Gira",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/michaelgira23/ultra-server-side-rendering/issues"
+  },
+  "homepage": "https://github.com/michaelgira23/ultra-server-side-rendering#readme",
+  "dependencies": {
+    "express": "^4.16.3",
+    "puppeteer": "git+https://github.com/Lostmyname/puppeteer.git",
+    "socket.io": "^2.1.1"
+  }
+}

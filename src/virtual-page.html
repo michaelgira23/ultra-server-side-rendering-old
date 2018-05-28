@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Loading...</title>
+		<style>
+			#app {
+				position: absolute;
+				top: 0;
+				right: 0;
+				bottom: 0;
+				left: 0;
+			}
+		</style>
+	</head>
+	<body>
+
+		<img id="app">
+
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js"></script>
+		<script>
+			const fps = 1000;
+			const app = document.getElementById('app');
+
+			// Track the cursor and send it to the government
+			var cursorX;
+			var cursorY;
+
+			document.onmousemove = function(event) {
+				cursorX = event.pageX;
+				cursorY = event.pageY;
+			}
+
+			// renderPage();
+			//
+			// function renderPage() {
+			// 	var url = '/render?width=' + window.innerWidth + '&height=' + window.innerHeight + '&cursorX=' + cursorX + '&cursorY=' + cursorY;
+			// 	fetch(url)
+			// 		.then(function(response) {
+			// 			return response.text();
+			// 		})
+			// 		.then(function(base64) {
+			// 			app.setAttribute('src', 'data:image/png;base64,' + base64);
+			// 			renderPage();
+			// 		});
+			// }
+		</script>
+
+
+		<script>
+			var socket = io.connect();
+			socket.on('render', base64 => {
+				console.log(base64);
+				app.setAttribute('src', 'data:image/png;base64,' + base64);
+			});
+		</script>
+
+		<!-- *** jQuery *** -->
+		<script src="http://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
+	</body>
+</html>
