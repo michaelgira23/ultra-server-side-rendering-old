@@ -3,11 +3,15 @@
 	<head>
 		<title>Loading...</title>
 		<style>
+
+			body {
+				overflow-x: hidden;
+				background: #263238;
+			}
+
 			#app {
 				position: absolute;
 				top: 0;
-				right: 0;
-				bottom: 0;
 				left: 0;
 			}
 		</style>
@@ -18,40 +22,47 @@
 
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js"></script>
 		<script>
-			const fps = 1000;
 			const app = document.getElementById('app');
+			const socket = io.connect();
 
-			// Track the cursor and send it to the government
-			var cursorX;
-			var cursorY;
+			// Save parameters and send them periodically
+			let viewportDimensions = null;
+			let mousePosition = null;
 
-			document.onmousemove = function(event) {
-				cursorX = event.pageX;
-				cursorY = event.pageY;
-			}
-
-			// renderPage();
-			//
-			// function renderPage() {
-			// 	var url = '/render?width=' + window.innerWidth + '&height=' + window.innerHeight + '&cursorX=' + cursorX + '&cursorY=' + cursorY;
-			// 	fetch(url)
-			// 		.then(function(response) {
-			// 			return response.text();
-			// 		})
-			// 		.then(function(base64) {
-			// 			app.setAttribute('src', 'data:image/png;base64,' + base64);
-			// 			renderPage();
-			// 		});
-			// }
-		</script>
-
-
-		<script>
-			var socket = io.connect();
 			socket.on('render', base64 => {
-				console.log(base64);
+				console.log('Received frame');
 				app.setAttribute('src', 'data:image/png;base64,' + base64);
 			});
+
+			socket.on('ready', () => {
+				console.log('Ready!');
+				onResize();
+				onMouseMove();
+			});
+
+			// Track screen size and send to government
+			function onResize() {
+				viewportDimensions = {
+					width: window.outerWidth,
+					height: window.outerHeight
+				};
+				socket.emit('viewport dimensions', viewportDimensions);
+			}
+			document.body.onresize = onResize;
+
+			// Track the cursor and also send to government
+			function onMouseMove(event) {
+				if (event) {
+					mousePosition = {
+						x: event.pageX,
+						y: event.pageY
+					};
+				}
+				if (mousePosition === null) return;
+				socket.emit('mouse position', mousePosition);
+				console.log('mouse position', mousePosition);
+			};
+			document.onmousemove = onMouseMove;
 		</script>
 
 		<!-- *** jQuery *** -->
