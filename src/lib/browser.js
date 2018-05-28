@@ -8,9 +8,11 @@ class Browser {
 		this.socket = socket;
 		this.puppet = null;
 		this.page = null;
+
+		this.title = null;
 		this.view = null;
 
-		this.viewportDimensions = null;
+		this.viewport = null;
 		this.mousePosition = null;
 
 		// Whether or not to update headless Chromium with mouse events, viewport, etc.
@@ -26,15 +28,17 @@ class Browser {
 		this.page = await this.puppet.newPage();
 		await this.navigate(`file://${__dirname}/../pages/page1.html`);
 
-		this.socket.on('viewport dimensions', dimensions => this.setViewportDimensions(dimensions));
+		this.socket.on('viewport dimensions', dimensions => this.setViewport(dimensions));
 		this.socket.on('mouse position', position => this.setMousePosition(position));
 
 		this.socket.emit('ready');
 
-		while (this.renderCycle) {
-			await this.render();
-			await new Promise(resolve => setTimeout(resolve, 1000));
-		}
+		this.socket.once('viewport dimensions', async () => {
+			while (this.renderCycle) {
+				await this.render();
+				await new Promise(resolve => setTimeout(resolve, 1000));
+			}
+		});
 	}
 
 	async kill() {
@@ -49,10 +53,14 @@ class Browser {
 	async render() {
 		this.pauseBrowserUpdates = true;
 		this.view = await this.page.screenshot({ encoding: 'base64' });
+		this.title = await this.page.title();
 		this.pauseBrowserUpdates = false;
-		this.setViewportDimensions();
+		this.setViewport();
 		this.setMousePosition();
-		this.socket.emit('render', this.view);
+		this.socket.emit('render', {
+			title: this.title,
+			view: this.view
+		});
 	}
 
 	/**
@@ -60,20 +68,22 @@ class Browser {
 	 */
 
 	/**
-	 * Size - { width, height }
+	 * viewport - { width, height, devicePixelRatio }
 	 */
 
-	setViewportDimensions(size) {
-		if (size) {
-			this.viewportDimensions = {
-				width: size.width,
-				height: size.height
+	setViewport(viewport) {
+		if (viewport) {
+			this.viewport = {
+				width: viewport.width,
+				height: viewport.height,
+				deviceScaleFactor: viewport.devicePixelRatio
 			};
 		}
-		if (!this.pauseBrowserUpdates && this.viewportDimensions !== null) {
+		if (!this.pauseBrowserUpdates && this.viewport !== null) {
 			this.page.setViewport({
-				width: this.viewportDimensions.width,
-				height: this.viewportDimensions.height
+				width: this.viewport.width,
+				height: this.viewport.height,
+				deviceScaleFactor: this.viewport.devicePixelRatio
 			});
 			console.log('set viewport');
 		}

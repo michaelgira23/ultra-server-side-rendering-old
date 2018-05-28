@@ -29,9 +29,10 @@
 			let viewportDimensions = null;
 			let mousePosition = null;
 
-			socket.on('render', base64 => {
-				console.log('Received frame');
-				app.setAttribute('src', 'data:image/png;base64,' + base64);
+			socket.on('render', ({ title, view }) => {
+				console.log('Received frame', title);
+				document.title = title;
+				app.setAttribute('src', 'data:image/png;base64,' + view);
 			});
 
 			socket.on('ready', () => {
@@ -44,7 +45,8 @@
 			function onResize() {
 				viewportDimensions = {
 					width: window.outerWidth,
-					height: window.outerHeight
+					height: window.outerHeight,
+					devicePixelRatio: window.devicePixelRatio
 				};
 				socket.emit('viewport dimensions', viewportDimensions);
 			}
